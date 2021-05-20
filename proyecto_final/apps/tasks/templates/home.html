@@ -1,0 +1,28 @@
+<H1>Home Usuarios</H1>
+
+{% if request.session.logged_user %}
+<p> Usuario Registrado : {{request.session.logged_user}}</p>
+    <a href="/logout">Log Out</a>
+{% endif%}
+
+
+
+<form action="task" id = "formTask" method="post">
+    {%csrf_token%}
+    <p>Nombre: <input type='text' name='name'></p>
+    <p>Fecha Limite: <input type = 'text' name="due_date" placeholder="dd/mm/AAAA"></p>
+    <button type="submit">Guardar</button>
+
+</form>
+
+
+{% if user.tasks.all %}
+
+{% for task in user.tasks.all %}
+{{task.name}}
+{{task.completed}}
+{{task.due_date}}
+
+{%endfor%}
+
+{%endif%}

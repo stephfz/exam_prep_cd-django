@@ -1,0 +1,16 @@
+<h1>Index</h1>
+
+
+
+
+<form action="register" id = 'formRegister' method="post">
+    {%csrf_token%}
+    {{ formRegister.as_p }}
+    <button type="submit">Registrar</button>
+</form>
+
+<form action="login" id = 'formLogin' method="post">
+    {%csrf_token%}
+    {{ formLogin.as_p }}
+    <button type="submit">Ingresar</button>
+</form>
