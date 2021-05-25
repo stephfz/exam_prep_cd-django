@@ -11,4 +11,5 @@ class LoginForm(forms.Form):
         email= self.cleaned_data.get('email')
         password = self.cleaned_data.get('password')
         user = User.authenticate(email, password)
+        print ("=====> User: ", user)
         return user

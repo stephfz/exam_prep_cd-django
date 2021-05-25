@@ -15,14 +15,41 @@
 
 </form>
 
+<h4>Tareas Pendientes</h4>
+
+<table> 
+
+<th>Tarea</th>
+<th>Fecha Limite</th>
+<th>Completada</th>
+<th>Acciones</th>
 
 {% if user.tasks.all %}
 
-{% for task in user.tasks.all %}
-{{task.name}}
-{{task.completed}}
-{{task.due_date}}
-
+{% for task in tasks_pending %}
+<tr>
+<td>{{task.name}}</td>
+<td>{{task.due_date}}</td>
+<td>{{task.completed}}</td>
+<td> <a href ="/task_detail/{{task.id}}">  Editar</a> </td>
+</tr>
 {%endfor%}
-
+</table>
 {%endif%}
+
+<h4>Tareas Terminadas</h4>
+
+<table>
+    <th>Tarea</th>
+    <th>Fecha Limite</th>
+    <th>Completa en:</th>
+    {% for task in tasks_completed %}
+    <tr>
+        <td>{{task.name}}</td>
+        <td>{{task.due_date}}</td>
+        <td>{{task.updated_at}}</td>
+    </tr>
+    {%endfor%}
+
+
+</table>

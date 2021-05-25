@@ -4,6 +4,7 @@ import re
 from .models import Task, User
 from django.shortcuts import render, redirect, resolve_url
 from .forms.user import UserForm
+from .forms.task import TaskForm
 from .forms.customForms import LoginForm
 
 def index(request):
@@ -35,6 +36,7 @@ def login(request):
         if formLogin.is_valid():
             user = formLogin.login(request.POST)
             if user:
+                print ("login --->")
                 request.session['logged_user'] = user.name
                 request.session['logged_user_id'] = user.id
                 return redirect("/home")
@@ -46,12 +48,24 @@ def logout(request):
         del request.session['logged_user']
         del request.session['logged_user_id']
     except:
-        print('Erorr')
+        print('Error')
     return redirect("/")                    
 
 def home(request):
-    user = User.objects.get(id = int(request.session['logged_user_id']))
-    return render(request, 'home.html', {'user': user})
+    try:
+        user = User.objects.get(id = int(request.session['logged_user_id']))
+        if user:
+            #tareas pendientes , completed = False 
+            tasks_pending = user.tasks.all().filter(completed = False)
+            #tareas completadas
+            tasks_completed = user.tasks.all().filter(completed = True)
+            print("=====completed> ", tasks_completed)
+            return render(request, 'home.html', {'user': user, 'tasks_pending': tasks_pending, 'tasks_completed': tasks_completed})
+        else:
+            return redirect("/")
+    except:
+        return redirect("/")
+
 
 def task(request):
     if request.method == "POST":
@@ -60,4 +74,25 @@ def task(request):
         task = Task.objects.create(name = request.POST['name'], 
                             due_date = request.POST['due_date'],
                             user = user)
-        return redirect("/home")                    
+        return redirect("/home")   
+
+
+def task_detail(request, task_id):
+    task = Task.objects.get(id = int(task_id))
+    if request.method == "POST": #actualizar task
+        formTask = TaskForm(request.POST, instance=task)
+        if formTask.is_valid():
+            completed = request.POST.get('completed', '') == 'on'
+            task.name = request.POST['name']
+            task.completed = completed
+            task.save() #actualizar task
+            return redirect('/home')
+    else:
+        formTask = TaskForm(instance=task)
+        return render(request, 'task_detail.html' , {'formTask': formTask})        
+
+        
+
+
+
+
