@@ -1,3 +1,9 @@
+{% load static%}
+
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
 <form action = '' id = "formTask" method = "post">
 
     {% csrf_token%}
