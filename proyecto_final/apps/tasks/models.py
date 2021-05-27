@@ -5,7 +5,7 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 
 from django.contrib.auth.hashers import check_password, make_password
-
+import datetime
 
 MIN_FIELD_LENGHT = 4
 
@@ -20,7 +20,14 @@ def ValidarEmail(cadena):
     if not EMAIL_REGEX.match(cadena):  
         raise ValidationError(
             f'{cadena} no es un e-mail valido'
-        )        
+        )
+
+def ValidarFecha(cadena):
+    print ("====DueDate: ", cadena)
+    if len(cadena) == 0:
+        raise ValidationError(
+            f"Fecha Invalida"
+        )                
 
 
 class User(models.Model):
@@ -45,13 +52,33 @@ class User(models.Model):
             bd_password = user.password
             if check_password(password, bd_password):
                   return user
-        return None           
+        return None
 
+    @staticmethod
+    def user_exists(email):
+        results = User.objects.filter(email = email)
+        if len(results) == 0:
+            return False
+        return True 
+
+
+class TaskManager(models.Manager):
+    def validator(self, posData):
+        errors = {}
+        if len(posData['due_date']) == 0:
+            errors['due_date'] = "Fecha no puede ser vacia"
+        str_date =  datetime.datetime.strptime(posData['due_date'],'%Y-%m-%d')
+        print(str_date)
+        if str_date < datetime.datetime.now():   
+            errors['due_date'] = "La fecha no puede estar en el pasado"
+        return errors    
 
 class Task(models.Model):
     name = models.CharField(max_length=45, blank = False, null =False, validators=[ValidarLongitudMinima])
-    due_date = models.DateField()
+    due_date = models.DateField(blank = False, validators=[ValidarFecha])
     completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, related_name="tasks", on_delete=models.CASCADE)
+    objects = TaskManager()
+

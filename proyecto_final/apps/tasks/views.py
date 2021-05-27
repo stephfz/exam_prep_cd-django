@@ -7,6 +7,8 @@ from .forms.user import UserForm
 from .forms.task import TaskForm
 from .forms.customForms import LoginForm
 
+from django.contrib import messages
+
 def index(request):
     ##GET
     #mostrar form de login
@@ -23,6 +25,7 @@ def register(request):
         if formRegister.is_valid():
             user = formRegister.save()
             request.session['logged_user'] = user.name
+            request.session['logged_user_id'] = user.id
             return redirect("/home")
     formLogin = LoginForm()         
     return render(request, 'index.html', {'formRegister': formRegister,'formLogin': formLogin})  
@@ -36,7 +39,6 @@ def login(request):
         if formLogin.is_valid():
             user = formLogin.login(request.POST)
             if user:
-                print ("login --->")
                 request.session['logged_user'] = user.name
                 request.session['logged_user_id'] = user.id
                 return redirect("/home")
@@ -56,10 +58,9 @@ def home(request):
         user = User.objects.get(id = int(request.session['logged_user_id']))
         if user:
             #tareas pendientes , completed = False 
-            tasks_pending = user.tasks.all().filter(completed = False)
+            tasks_pending = user.tasks.all().filter(completed = False).order_by('-due_date')
             #tareas completadas
             tasks_completed = user.tasks.all().filter(completed = True)
-            print("=====completed> ", tasks_completed)
             return render(request, 'home.html', {'user': user, 'tasks_pending': tasks_pending, 'tasks_completed': tasks_completed})
         else:
             return redirect("/")
@@ -71,14 +72,22 @@ def task(request):
     if request.method == "POST":
         #guardar el task
         user = User.objects.get(id = int(request.session['logged_user_id']))
-        task = Task.objects.create(name = request.POST['name'], 
-                            due_date = request.POST['due_date'],
-                            user = user)
+
+        errors = Task.objects.validator(request.POST)
+        if len(errors) > 0:
+            for key, value in errors.items():
+                messages.error(request, value, key)                               
+            return redirect('/home')    
+        else:    
+            task = Task.objects.create(name = request.POST['name'], 
+                                due_date = request.POST['due_date'],
+                                user = user)
         return redirect("/home")   
 
 
 def task_detail(request, task_id):
     task = Task.objects.get(id = int(task_id))
+    formTask = TaskForm(instance = task)
     if request.method == "POST": #actualizar task
         formTask = TaskForm(request.POST, instance=task)
         if formTask.is_valid():
@@ -87,9 +96,7 @@ def task_detail(request, task_id):
             task.completed = completed
             task.save() #actualizar task
             return redirect('/home')
-    else:
-        formTask = TaskForm(instance=task)
-        return render(request, 'task_detail.html' , {'formTask': formTask})        
+    return render(request, 'task_detail.html' , {'formTask': formTask})        
 
         
 

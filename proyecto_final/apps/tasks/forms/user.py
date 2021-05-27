@@ -17,7 +17,8 @@ class UserForm(forms.ModelForm):
                     attrs={
                         'input_format' : "%m/%d/%Y",
                         'placeholder' : 'mm-dd-AAAA',
-                        'autocomplete' : 'off'
+                        'autocomplete' : 'off',
+                         'id': 'datepicker'
                     }
                 )
     )
@@ -25,8 +26,8 @@ class UserForm(forms.ModelForm):
         model = User
         fields = ['name','lastname','email', 'fecha_nacimiento', 'password']
         widgets = {
-            'name' : forms.TextInput(attrs={'placeholder': 'Nombres Completos'}),
-            'password' : forms.PasswordInput()
+            'name' : forms.TextInput(attrs={'placeholder': 'Nombres Completos', "class": "form-control"}),
+            'password' : forms.PasswordInput(),
         }
         labels = {
            'name': "Nombres",
@@ -44,3 +45,7 @@ class UserForm(forms.ModelForm):
             raise forms.ValidationError(
                 "Las contraseñas no coinciden"
             )
+        user_exists = User.user_exists(cleaned_data.get("email"))
+        if user_exists:
+            raise forms.ValidationError("El usuario ya existe")
+            

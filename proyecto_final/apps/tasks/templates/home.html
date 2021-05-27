@@ -1,3 +1,20 @@
+{%load static%}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+
+    <link rel="stylesheet" src="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"></link> 
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" 
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" 
+    integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+
+
+    <script src="{% static 'js/functions.js' %}"> </script>   
+</head>
+
 <H1>Home Usuarios</H1>
 
 {% if request.session.logged_user %}
@@ -10,7 +27,14 @@
 <form action="task" id = "formTask" method="post">
     {%csrf_token%}
     <p>Nombre: <input type='text' name='name'></p>
-    <p>Fecha Limite: <input type = 'text' name="due_date" placeholder="dd/mm/AAAA"></p>
+    <p>Fecha Limite: <input type = 'text' name="due_date" placeholder="dd/mm/AAAA" id='datepicker'></p>
+
+    {% for message in messages %}
+    {%if "due_date" in message.tags%}
+        <p class ="error"> {{message}}</p>
+    {%endif%}
+{% endfor %} 
+
     <button type="submit">Guardar</button>
 
 </form>
