@@ -6,7 +6,7 @@ import datetime
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['name', 'due_date', 'completed']
+        fields = ['name', 'due_date', 'completed'] #"__all__"
         widgets = {
             'completed' : forms.CheckboxInput()
         }

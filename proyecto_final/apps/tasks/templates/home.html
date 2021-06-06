@@ -53,7 +53,7 @@
 {% for task in tasks_pending %}
 <tr>
 <td>{{task.name}}</td>
-<td>{{task.due_date}}</td>
+<td>{{task.due_date|date:"D d M Y"}}</td>
 <td>{{task.completed}}</td>
 <td> <a href ="/task_detail/{{task.id}}">  Editar</a> </td>
 </tr>
@@ -70,10 +70,39 @@
     {% for task in tasks_completed %}
     <tr>
         <td>{{task.name}}</td>
-        <td>{{task.due_date}}</td>
+        <td>{{task.due_date|date:"D d M Y"}}</td>
         <td>{{task.updated_at}}</td>
     </tr>
     {%endfor%}
+
+
+</table>
+
+
+<h4>Tareas Terminadas v2 de todos los usuarios</h4>
+
+<table>
+    <th>Tarea</th>
+    <th>User</th>
+    <th>Completa en:</th>
+    <th>Likes</th>
+    <th>Acciones</th>
+    {% for task in all_tasks %}
+    <tr>
+        <td>{{task.name}}</td>
+        <td>{{task.user.name}}</td>
+        <td>{{task.due_date|date:"d M Y"}}</td>
+        <td>{{task.likes.count}}</td>
+        {% if task.user.id != request.session.logged_user_id %}
+            {%if task not in user.likes.all%}
+                <td><a href="{% url 'like' task_id=task.id %}"> Like </a></td>
+            {%endif%}    
+        {%else%}
+        <td></td>
+        {%endif%}
+    </tr>
+    {%endfor%}
+
 
 
 </table>

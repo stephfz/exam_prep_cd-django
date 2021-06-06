@@ -23,8 +23,7 @@ def ValidarEmail(cadena):
         )
 
 def ValidarFecha(cadena):
-    print ("====DueDate: ", cadena)
-    if len(cadena) == 0:
+    if len(str(cadena)) == 0:
         raise ValidationError(
             f"Fecha Invalida"
         )                
@@ -56,10 +55,11 @@ class User(models.Model):
 
     @staticmethod
     def user_exists(email):
-        results = User.objects.filter(email = email)
+        results = User.objects.filter(email = email).exists()
         if len(results) == 0:
             return False
         return True 
+        #return User.objects.filter(email = email).exists()
 
 
 class TaskManager(models.Manager):
@@ -80,5 +80,7 @@ class Task(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, related_name="tasks", on_delete=models.CASCADE)
+    likes   = models.ManyToManyField(User, related_name='likes')
     objects = TaskManager()
+
 

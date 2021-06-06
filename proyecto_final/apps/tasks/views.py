@@ -28,7 +28,8 @@ def register(request):
             request.session['logged_user_id'] = user.id
             return redirect("/home")
     formLogin = LoginForm()         
-    return render(request, 'index.html', {'formRegister': formRegister,'formLogin': formLogin})  
+    return render(request, 'index.html', 
+            {'formRegister': formRegister,'formLogin': formLogin})  
 
 
 def login(request):
@@ -59,9 +60,17 @@ def home(request):
         if user:
             #tareas pendientes , completed = False 
             tasks_pending = user.tasks.all().filter(completed = False).order_by('-due_date')
-            #tareas completadas
+            #tareas mis completadas
             tasks_completed = user.tasks.all().filter(completed = True)
-            return render(request, 'home.html', {'user': user, 'tasks_pending': tasks_pending, 'tasks_completed': tasks_completed})
+
+            #Todas las Tareas completadas
+            all_tasks = Task.objects.filter(completed = True)
+
+            return render(request, 'home.html', 
+                            {'user': user, 
+                            'tasks_pending': tasks_pending, 
+                            'tasks_completed': tasks_completed,
+                            'all_tasks': all_tasks})
         else:
             return redirect("/")
     except:
@@ -72,7 +81,6 @@ def task(request):
     if request.method == "POST":
         #guardar el task
         user = User.objects.get(id = int(request.session['logged_user_id']))
-
         errors = Task.objects.validator(request.POST)
         if len(errors) > 0:
             for key, value in errors.items():
@@ -96,7 +104,15 @@ def task_detail(request, task_id):
             task.completed = completed
             task.save() #actualizar task
             return redirect('/home')
-    return render(request, 'task_detail.html' , {'formTask': formTask})        
+    return render(request, 'task_detail.html' , {'formTask': formTask})
+
+def like(request, task_id):
+    results = Task.objects.filter(id=task_id)
+    if len(results) > 0:
+        task = results[0]
+        user = User.objects.get(id=request.session['logged_user_id'])
+        task.likes.add(user)
+        return redirect('/home')         
 
         
 
