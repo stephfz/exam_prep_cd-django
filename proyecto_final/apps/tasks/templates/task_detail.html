@@ -1,8 +1,14 @@
+{% extends 'base.html' %}
+{% block content%}
+
 <form action = '' id = "formTask" method = "post">
 
     {% csrf_token%}
     {{ formTask.as_p }}
 
     <button type ="submit">Guardar</button>
+    <button type="submit" name="cancel" value="Cancel">Cancel</button>
 
 </form>
+
+{% endblock%}

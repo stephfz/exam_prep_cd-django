@@ -3,7 +3,18 @@ from django.forms import widgets
 from ..models import Task
 import datetime
 
+custom_errors = {
+    'required': 'Requerido',
+    'invalid': 'Fecha Invalida'
+}
+
 class TaskForm(forms.ModelForm):
+    due_date = forms.DateField(error_messages= custom_errors,
+                widget=forms.DateInput(
+                    attrs={
+                        "type" : "date"                    
+                    }
+                ))
     class Meta:
         model = Task
         fields = ['name', 'due_date', 'completed'] #"__all__"

@@ -50,16 +50,13 @@ class User(models.Model):
             user = results[0]
             bd_password = user.password
             if check_password(password, bd_password):
-                  return user
+                  return user        
         return None
 
     @staticmethod
     def user_exists(email):
-        results = User.objects.filter(email = email).exists()
-        if len(results) == 0:
-            return False
-        return True 
-        #return User.objects.filter(email = email).exists()
+        #results = User.objects.filter(email = email).exists()
+        return User.objects.filter(email = email).exists()
 
 
 class TaskManager(models.Manager):

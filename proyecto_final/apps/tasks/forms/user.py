@@ -15,10 +15,7 @@ class UserForm(forms.ModelForm):
     fecha_nacimiento = forms.DateField(error_messages= my_default_errors,
                 widget=forms.DateInput(
                     attrs={
-                        'input_format' : "%m/%d/%Y",
-                        'placeholder' : 'mm-dd-AAAA',
-                        'autocomplete' : 'off',
-                         'id': 'datepicker'                       
+                        "type" : "date"                    
                     }
                 )
     )
@@ -26,7 +23,7 @@ class UserForm(forms.ModelForm):
         model = User
         fields = ['name','lastname','email', 'fecha_nacimiento', 'password']
         widgets = {
-            'name' : forms.TextInput(attrs={'placeholder': 'Nombres Completos', "class": "form-control"}),
+            'name' : forms.TextInput(attrs={'placeholder': 'Nombres Completos'}),
             'password' : forms.PasswordInput(),
         }
         labels = {

@@ -1,13 +1,32 @@
 
 from collections import deque
 import re
+
+from django.db.models import query
 from .models import Task, User
 from django.shortcuts import render, redirect, resolve_url
 from .forms.user import UserForm
 from .forms.task import TaskForm
 from .forms.customForms import LoginForm
-
 from django.contrib import messages
+
+
+from django.views.generic import ListView
+
+class TasksListView(ListView):
+    template_name = 'tasks-list.html'
+    queryset = Task.objects.filter(completed = True).order_by('-due_date')
+    paginate_by = 5
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_id = self.request.session['logged_user_id']
+        user = User.objects.get(id = int(user_id))
+        context['user'] = user
+        print (context)
+        return context
+
+
 
 def index(request):
     ##GET
@@ -30,7 +49,6 @@ def register(request):
     formLogin = LoginForm()         
     return render(request, 'index.html', 
             {'formRegister': formRegister,'formLogin': formLogin})  
-
 
 def login(request):
     if request.method == "GET":
@@ -63,14 +81,10 @@ def home(request):
             #tareas mis completadas
             tasks_completed = user.tasks.all().filter(completed = True)
 
-            #Todas las Tareas completadas
-            all_tasks = Task.objects.filter(completed = True)
-
             return render(request, 'home.html', 
                             {'user': user, 
                             'tasks_pending': tasks_pending, 
-                            'tasks_completed': tasks_completed,
-                            'all_tasks': all_tasks})
+                            'tasks_completed': tasks_completed})
         else:
             return redirect("/")
     except:
@@ -98,6 +112,8 @@ def task_detail(request, task_id):
     formTask = TaskForm(instance = task)
     if request.method == "POST": #actualizar task
         formTask = TaskForm(request.POST, instance=task)
+        if  "cancel" in request.POST:
+            return redirect('/home')
         if formTask.is_valid():
             completed = request.POST.get('completed', '') == 'on'
             task.name = request.POST['name']
@@ -112,10 +128,9 @@ def like(request, task_id):
         task = results[0]
         user = User.objects.get(id=request.session['logged_user_id'])
         task.likes.add(user)
-        return redirect('/home')         
+        return redirect('dashboard')         
 
         
-
 
 
 

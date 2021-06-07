@@ -1,6 +1,11 @@
 .errorlist{
     color: red;
-      }
+}
+
+.error{
+  color: red;
+}
+
 
 label {
   width: 100px;

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content%}
+
+<h4>Tareas Terminadas de todos los Taskers</h4>
+
+<table class="table table-striped">
+    <th>Tarea</th>
+    <th>User</th>
+    <th>Completa en:</th>
+    <th>Likes</th>
+    <th>Acciones</th>
+    {% for task in task_list %}
+    <tr>
+        <td>{{task.name}}</td>
+        <td>{{task.user.name}}</td>
+        <td>{{task.due_date|date:"d M Y"}}</td>
+        <td>{{task.likes.count}}</td>
+        {% if task.user.id != user.id %}
+            {%if task not in user.likes.all%}
+                <td><a href="{% url 'like' task_id=task.id %}"> Like </a></td>
+                {%else%}
+                <td>  </td>    
+            {%endif%}    
+        {%else%}
+        <td>  </td>
+        {%endif%}
+    </tr>
+    {%endfor%}
+
+
+
+</table>
+<nav>
+    {% if is_paginated %}
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+            {% endif %}
+
+            {% for i in paginator.page_range %}
+                <li {% if page_obj.number == i %} class="active" {% endif %}>
+                    <a href="?page={{i}}">[{{ i }}]</a>
+                </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+            {% endif %}
+        </ul>
+    {% endif %}
+</nav>
+
+
+{% endblock%}
