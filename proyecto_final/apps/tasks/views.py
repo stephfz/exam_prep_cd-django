@@ -1,13 +1,34 @@
 
 from collections import deque
 import re
+
+from django.http.response import JsonResponse
 from .models import Task, User
-from django.shortcuts import render, redirect, resolve_url
+from django.shortcuts import render, redirect, render_to_response, resolve_url
 from .forms.user import UserForm
 from .forms.task import TaskForm
 from .forms.customForms import LoginForm
 
 from django.contrib import messages
+
+from django.views.generic import ListView
+from django.template.loader import render_to_string
+
+
+class TasksListView(ListView):
+    template_name = "dashboard.html"
+    queryset = Task.objects.filter(completed = True).order_by('-due_date')
+    paginate_by = 5
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print ("user --> ", self.request.session['logged_user_id']   )
+        user_id = self.request.session['logged_user_id']   
+        user = User.objects.get(id = int(user_id))
+        context['user'] = user
+        print(context) 
+        return context
+
 
 def index(request):
     ##GET
@@ -63,34 +84,37 @@ def home(request):
             #tareas mis completadas
             tasks_completed = user.tasks.all().filter(completed = True)
 
-            #Todas las Tareas completadas
-            all_tasks = Task.objects.filter(completed = True)
-
             return render(request, 'home.html', 
                             {'user': user, 
-                            'tasks_pending': tasks_pending, 
-                            'tasks_completed': tasks_completed,
-                            'all_tasks': all_tasks})
+                            'tasks_pending': tasks_pending,
+                            'tasks_completed': tasks_completed})
         else:
             return redirect("/")
     except:
         return redirect("/")
-
+   
 
 def task(request):
     if request.method == "POST":
-        #guardar el task
+        print("======> Task Post")
+        print(request.POST)
         user = User.objects.get(id = int(request.session['logged_user_id']))
-        errors = Task.objects.validator(request.POST)
+        errors= Task.objects.validator(request.POST)
+        print("======> errors: ", errors)
         if len(errors) > 0:
             for key, value in errors.items():
                 messages.error(request, value, key)                               
-            return redirect('/home')    
+            return redirect('/home') 
         else:    
             task = Task.objects.create(name = request.POST['name'], 
                                 due_date = request.POST['due_date'],
                                 user = user)
-        return redirect("/home")   
+            tasks_pending = user.tasks.all().filter(completed = False).order_by('-due_date')                    
+            context = {'tasks_pending': tasks_pending}                    
+            if request.is_ajax():
+                html = render_to_string('user-tasks.html', context, request= request)
+                return JsonResponse({'form': html})                    
+ 
 
 
 def task_detail(request, task_id):
@@ -112,7 +136,7 @@ def like(request, task_id):
         task = results[0]
         user = User.objects.get(id=request.session['logged_user_id'])
         task.likes.add(user)
-        return redirect('/home')         
+        return redirect('dashboard')         
 
         
 

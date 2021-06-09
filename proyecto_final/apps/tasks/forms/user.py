@@ -15,10 +15,7 @@ class UserForm(forms.ModelForm):
     fecha_nacimiento = forms.DateField(error_messages= my_default_errors,
                 widget=forms.DateInput(
                     attrs={
-                        'input_format' : "%m/%d/%Y",
-                        'placeholder' : 'mm-dd-AAAA',
-                        'autocomplete' : 'off',
-                         'id': 'datepicker'                       
+                        'type' :"date",                   
                     }
                 )
     )

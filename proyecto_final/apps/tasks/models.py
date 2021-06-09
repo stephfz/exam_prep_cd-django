@@ -65,13 +65,16 @@ class User(models.Model):
 class TaskManager(models.Manager):
     def validator(self, posData):
         errors = {}
+        if len(posData['name'])==0:
+            errors['name'] = "El nombre no puede ser vacio"
         if len(posData['due_date']) == 0:
             errors['due_date'] = "Fecha no puede ser vacia"
-        str_date =  datetime.datetime.strptime(posData['due_date'],'%Y-%m-%d')
-        print(str_date)
-        if str_date < datetime.datetime.now():   
-            errors['due_date'] = "La fecha no puede estar en el pasado"
-        return errors    
+        else:    
+            str_date =  datetime.datetime.strptime(posData['due_date'],'%Y-%m-%d')
+            print(str_date)
+            if str_date < datetime.datetime.now():   
+                errors['due_date'] = "La fecha no puede estar en el pasado"
+        return errors     
 
 class Task(models.Model):
     name = models.CharField(max_length=45, blank = False, null =False, validators=[ValidarLongitudMinima])

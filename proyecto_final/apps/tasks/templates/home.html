@@ -1,19 +1,5 @@
-{%load static%}
-<head>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
-
-    <link rel="stylesheet" src="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"></link> 
-    
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" 
-    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-
-    <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" 
-    integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
-
-
-    <script src="{% static 'js/functions.js' %}"> </script>   
-</head>
+{% extends 'base.html' %}
+{% block content%}
 
 <H1>Home Usuarios</H1>
 
@@ -26,8 +12,8 @@
 
 <form action="task" id = "formTask" method="post">
     {%csrf_token%}
-    <p>Nombre: <input type='text' name='name'></p>
-    <p>Fecha Limite: <input type = 'text' name="due_date" placeholder="dd/mm/AAAA" id='datepicker'></p>
+    <p>Nombre: <input type='text' name='name' id ='name'></p>
+    <p>Fecha Limite: <input type = 'date' name="due_date" placeholder="dd/mm/AAAA" id='datepicker'></p>
 
     {% for message in messages %}
     {%if "due_date" in message.tags%}
@@ -39,70 +25,60 @@
 
 </form>
 
-<h4>Tareas Pendientes</h4>
 
-<table> 
+<div class = "pending-tasks">
+    
+    {%include 'user-tasks.html'%}
 
-<th>Tarea</th>
-<th>Fecha Limite</th>
-<th>Completada</th>
-<th>Acciones</th>
+</div>
 
-{% if user.tasks.all %}
 
-{% for task in tasks_pending %}
-<tr>
-<td>{{task.name}}</td>
-<td>{{task.due_date|date:"D d M Y"}}</td>
-<td>{{task.completed}}</td>
-<td> <a href ="/task_detail/{{task.id}}">  Editar</a> </td>
-</tr>
-{%endfor%}
-</table>
-{%endif%}
+
 
 <h4>Tareas Terminadas</h4>
+{% load tz %}
 
-<table>
+
+<table class="table table-striped">
     <th>Tarea</th>
     <th>Fecha Limite</th>
     <th>Completa en:</th>
     {% for task in tasks_completed %}
     <tr>
         <td>{{task.name}}</td>
+        {% timezone "America/Santiago" %}
+      
         <td>{{task.due_date|date:"D d M Y"}}</td>
-        <td>{{task.updated_at}}</td>
+        <td>{{task.updated_at |date:"D d M Y"}}</td>
+   
+
+        {% endtimezone %}
     </tr>
     {%endfor%}
 
 
 </table>
 
+<script>
+$('form').submit(function(e){
+  e.preventDefault()
+  $.ajax({
+    type: 'post',
+    url: $(this).attr('action'),
+    data: $(this).serialize(),
+    success: function(response){
+      console.log("Received this from server: ", response)
+      console.log("I should probably put that in the DOM...")
+      $('.pending-tasks').html(response['form']);
+      $("#name").val('');
+      $("#datepicker").val('');
+    },
+    error: function(re, e){
+        console.log(re.responseText)
+    }
+  })
+})
 
-<h4>Tareas Terminadas v2 de todos los usuarios</h4>
+</script>
 
-<table>
-    <th>Tarea</th>
-    <th>User</th>
-    <th>Completa en:</th>
-    <th>Likes</th>
-    <th>Acciones</th>
-    {% for task in all_tasks %}
-    <tr>
-        <td>{{task.name}}</td>
-        <td>{{task.user.name}}</td>
-        <td>{{task.due_date|date:"d M Y"}}</td>
-        <td>{{task.likes.count}}</td>
-        {% if task.user.id != request.session.logged_user_id %}
-            {%if task not in user.likes.all%}
-                <td><a href="{% url 'like' task_id=task.id %}"> Like </a></td>
-            {%endif%}    
-        {%else%}
-        <td></td>
-        {%endif%}
-    </tr>
-    {%endfor%}
-
-
-
-</table>
+{% endblock%}
