@@ -19,27 +19,12 @@
 </form>
 
 <p></p>
-<h4>Mis Tareas Pendientes</h4>
 
-<table class="table table-striped">
+<div class = "pending-tasks">
 
-<th>Tarea</th>
-<th>Fecha Limite</th>
-<th>Completada</th>
-<th>Acciones</th>
-
-{% if user.tasks.all %}
-
-{% for task in tasks_pending %}
-<tr>
-<td>{{task.name}}</td>
-<td>{{task.due_date|date:"D d M Y"}}</td>
-<td>{{task.completed}}</td>
-<td> <a href ="/task_detail/{{task.id}}">  Editar</a> </td>
-</tr>
-{%endfor%}
-</table>
-{%endif%}
+    {% include 'user-tasks.html' %}
+ 
+</div>
 
 <h4>Mis Tareas Terminadas</h4>
 {% load tz %}
@@ -59,6 +44,28 @@
 
 
 </table>
+
+<script>
+    $('form').submit(function(e){
+      e.preventDefault()
+      $.ajax({
+        type: 'post',
+        url: $(this).attr('action'),
+        data: $(this).serialize(),
+        success: function(response){
+          console.log("Received this from server: ", response)
+          console.log("I should probably put that in the DOM...")
+          $('.pending-tasks').html(response['form']);
+          $("#name").val('');
+          $("#datepicker").val('');
+        },
+        error: function(re, e){
+            console.log(re.responseText)
+        }
+      })
+    })
+    
+    </script>
 
 
 {% endblock%}

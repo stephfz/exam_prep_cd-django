@@ -1,0 +1,21 @@
+<h4>Mis Tareas Pendientes</h4>
+
+<table class="table table-striped">
+
+<th>Tarea</th>
+<th>Fecha Limite</th>
+<th>Completada</th>
+<th>Acciones</th>
+
+{% if user.tasks.all %}
+
+{% for task in tasks_pending %}
+<tr>
+<td>{{task.name}}</td>
+<td>{{task.due_date|date:"D d M Y"}}</td>
+<td>{{task.completed}}</td>
+<td> <a href ="/task_detail/{{task.id}}">  Editar</a> </td>
+</tr>
+{%endfor%}
+</table>
+{%endif%}

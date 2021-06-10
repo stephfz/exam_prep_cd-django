@@ -3,6 +3,7 @@ from collections import deque
 import re
 
 from django.db.models import query
+from django.http.response import JsonResponse
 from .models import Task, User
 from django.shortcuts import render, redirect, resolve_url
 from .forms.user import UserForm
@@ -12,6 +13,9 @@ from django.contrib import messages
 
 
 from django.views.generic import ListView
+
+from django.template.loader import render_to_string
+
 
 class TasksListView(ListView):
     template_name = 'tasks-list.html'
@@ -104,7 +108,14 @@ def task(request):
             task = Task.objects.create(name = request.POST['name'], 
                                 due_date = request.POST['due_date'],
                                 user = user)
-        return redirect("/home")   
+            tasks_pending = user.tasks.all().filter(completed = False).order_by('-due_date')                    
+            context = {'tasks_pending': tasks_pending} 
+            print (context)                   
+            if request.is_ajax():
+                html = render_to_string('user-tasks.html', context, request= request)
+                print (html)  
+                return JsonResponse({'form': html})  
+        #return redirect("/home")   
 
 
 def task_detail(request, task_id):
