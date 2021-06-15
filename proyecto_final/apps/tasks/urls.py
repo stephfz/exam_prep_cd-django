@@ -9,4 +9,5 @@ urlpatterns = [
     path('home', views.home),
     path('task', views.task),
     path('task_detail/<int:task_id>', views.task_detail),
+    #path('task_detail',views.task_detail)
 ]

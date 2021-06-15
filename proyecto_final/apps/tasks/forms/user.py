@@ -17,7 +17,8 @@ class UserForm(forms.ModelForm):
                     attrs={
                         'input_format' : "%m/%d/%Y",
                         'placeholder' : 'mm-dd-AAAA',
-                        'autocomplete' : 'off'
+                        'autocomplete' : 'off',
+                        'id' : 'datepicker'
                     }
                 )
     )

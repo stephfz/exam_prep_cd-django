@@ -23,6 +23,7 @@ def register(request):
         if formRegister.is_valid():
             user = formRegister.save()
             request.session['logged_user'] = user.name
+            request.session['logged_user_id'] = user.id
             return redirect("/home")
     formLogin = LoginForm()         
     return render(request, 'index.html', {'formRegister': formRegister,'formLogin': formLogin})  
@@ -36,7 +37,6 @@ def login(request):
         if formLogin.is_valid():
             user = formLogin.login(request.POST)
             if user:
-                print ("login --->")
                 request.session['logged_user'] = user.name
                 request.session['logged_user_id'] = user.id
                 return redirect("/home")
@@ -79,6 +79,7 @@ def task(request):
 
 def task_detail(request, task_id):
     task = Task.objects.get(id = int(task_id))
+    formTask = TaskForm(instance=task)
     if request.method == "POST": #actualizar task
         formTask = TaskForm(request.POST, instance=task)
         if formTask.is_valid():
@@ -87,9 +88,7 @@ def task_detail(request, task_id):
             task.completed = completed
             task.save() #actualizar task
             return redirect('/home')
-    else:
-        formTask = TaskForm(instance=task)
-        return render(request, 'task_detail.html' , {'formTask': formTask})        
+    return render(request, 'task_detail.html' , {'formTask': formTask})     
 
         
 
